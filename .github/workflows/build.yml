@@ -18,12 +18,18 @@ jobs:
         with:
           python-version: '3.13.2'
 
+      - name: Install Tkinter on Ubuntu
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk
+
       - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller geopy tkinter
+          pip install pyinstaller geopy
           pip install tkintermapview
-          pip install pyinstaller
+          pip install pillow
 
       - name: 🔨 Build executable
         run: |
