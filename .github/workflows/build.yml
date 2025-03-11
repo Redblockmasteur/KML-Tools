@@ -38,13 +38,13 @@ jobs:
       - name: 🔨 Build executable (Linux & Mac)
         if: runner.os != 'Windows'
         run: |
-          pyinstaller --onefile --windowed --add-data "img/logo.png:img" --name "KML_Generator" square.py
+          pyinstaller --onefile --windowed --add-data "logo.png:img" --name "KML_Generator" square.py
         shell: bash
 
       - name: 🔨 Build executable (Windows)
         if: runner.os == 'Windows'
         run: |
-          pyinstaller --onefile --windowed --add-data "img/logo.png;img" --name "KML_Generator" square.py
+          pyinstaller --onefile --windowed --add-data "logo.png;img" --name "KML_Generator" square.py
         shell: cmd
 
       - name: 📤 Upload artifact (Linux, Windows & MacOS)
