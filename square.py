@@ -1,3 +1,5 @@
+import os
+import sys
 import xml.etree.ElementTree as ET
 import tkinter as tk
 from tkinter import filedialog, ttk
@@ -35,6 +37,15 @@ LANGUAGES = {
     }
 }
 
+def resource_path(relative_path):
+    """ Récupère le bon chemin pour un fichier, que l'on soit en script Python ou en .exe """
+    try:
+        base_path = sys._MEIPASS  # Dossier temporaire utilisé par PyInstaller
+    except AttributeError:
+        base_path = os.path.abspath(".")  # Mode normal
+
+    return os.path.join(base_path, relative_path)
+
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -42,8 +53,11 @@ class App(tk.Tk):
         self.title(LANGUAGES[self.selected_language]["title"])
         self.geometry("800x650")
         
-        self.icon_image = ImageTk.PhotoImage(file="img/logo.png")
-        self.tk.call("wm", "iconphoto", self._w, self.icon_image)
+        try:
+            self.icon_image = ImageTk.PhotoImage(file=resource_path("logo.png"))
+            self.tk.call("wm", "iconphoto", self._w, self.icon_image)
+        except Exception as e:
+            print(f"⚠️ Impossible de charger l'icône : {e}")
         
         lang_frame = tk.Frame(self)
         lang_frame.pack(pady=5)
@@ -138,6 +152,7 @@ class App(tk.Tk):
             self.data_value_var.get()
         )
         self.status_label.config(text=LANGUAGES[self.selected_language]["saved"] + output_file)
+        
 
 if __name__ == "__main__":
     app = App()
