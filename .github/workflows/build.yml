@@ -3,7 +3,7 @@ name: Build KML Generator
 on:
   push:
     paths:
-      - "square.py"
+      - "square.py"  # Déclenche le workflow SEULEMENT si square.py est modifié
 
 jobs:
   build:
@@ -33,30 +33,23 @@ jobs:
           pip install pyinstaller geopy tkintermapview pillow
         shell: bash
 
-      - name: 🔄 Forcer Python en x86_64 pour macOS Intel
-        if: matrix.os == 'macos-latest'
-        run: |
-          arch -x86_64 /usr/local/bin/python3 -m venv venv_x86
-          source venv_x86/bin/activate
-          pip install --upgrade pip
-          pip install pyinstaller geopy tkintermapview pillow
-        shell: bash
-
-      - name: 📝 Générer le fichier d'information
-        run: |
-          echo "Build Date: $(date)" > build_info.txt
-          echo "OS: $RUNNER_OS" >> build_info.txt
-          echo "Python Version: $(python --version)" >> build_info.txt
-          echo "Commit: $(git rev-parse --short HEAD)" >> build_info.txt
-        shell: bash
-
       - name: 🔨 Build executable (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
           pyinstaller --onefile --windowed \
             --icon=logo.png \
             --add-data "logo.png:." \
-            --name "KML_Generator_Linux" \
+            --name "KML_Generator" \
+            square.py
+        shell: bash
+
+      - name: 🔨 Build executable (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          pyinstaller --onefile --windowed \
+            --icon=logo.icns \
+            --add-data "logo.icns:." \
+            --name "KML_Generator" \
             square.py
         shell: bash
 
@@ -66,51 +59,12 @@ jobs:
           pyinstaller --onefile --windowed ^
             --icon=logo.ico ^
             --add-data "logo.ico;." ^
-            --name "KML_Generator_Windows" ^
+            --name "KML_Generator" ^
             square.py
         shell: cmd
 
-      - name: 🔨 Build executable (macOS ARM64)
-        if: matrix.os == 'macos-latest'
-        run: |
-          pyinstaller --onefile --windowed --target-arch=arm64 \
-            --icon=logo.icns \
-            --add-data "logo.icns:." \
-            --name "KML_Generator_ARM64" \
-            square.py
-        shell: bash
-
-      - name: 🔨 Build executable (macOS Intel x86_64)
-        if: matrix.os == 'macos-latest'
-        run: |
-          source venv_x86/bin/activate
-          arch -x86_64 venv_x86/bin/python -m PyInstaller --onefile --windowed --target-arch=x86_64 \
-            --icon=logo.icns \
-            --add-data "logo.icns:." \
-            --name "KML_Generator_x86_64" \
-            square.py
-        shell: bash
-
-      - name: 🔨 Build executable (macOS Universel)
-        if: matrix.os == 'macos-latest'
-        run: |
-          pyinstaller --onefile --windowed --target-arch=universal2 \
-            --icon=logo.icns \
-            --add-data "logo.icns:." \
-            --name "KML_Generator_Universal" \
-            square.py
-        shell: bash
-
-      - name: 📦 Créer un fichier DMG (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          hdiutil create -volname "KML Generator" -srcfolder dist/KML_Generator_Universal.app -ov -format UDZO dist/KML_Generator.dmg
-        shell: bash
-
-      - name: 📤 Upload artifacts
+      - name: 📤 Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: KML_Generator_${{ matrix.os }}
-          path: |
-            dist/KML_Generator_*
-            build_info.txt
+          path: dist/KML_Generator*
