@@ -54,16 +54,15 @@ class App(tk.Tk):
         self.geometry("800x650")
         
         try:
+
             if sys.platform.startswith("win"):
-                try:
-                    self.iconbitmap("logo.ico")
-                except Exception as e:
-                    print(f"Erreur lors du chargement de l'icône ICO : {e}")
+                icon_path = resource_path("logo.ico")
+                self.iconbitmap(icon_path)
+
             else:
                 try:
                     icon_image = ImageTk.PhotoImage(file="logo.png")
                     self.iconphoto(False, icon_image)
-                    # Garder une référence pour éviter le ramasse-miettes
                     self._icon_image_ref = icon_image
                 except Exception as e:
                     print(f"Erreur lors du chargement de l'icône PNG : {e}")
