@@ -16,10 +16,11 @@ jobs:
       - name: ⚡ Vérifier si un build est nécessaire
         id: check_changes
         run: |
-          if git diff --quiet HEAD^ HEAD -- square.py requirements.txt; then
+          if git diff --quiet HEAD^ HEAD -- square.py; then
             echo "SKIP_BUILD=true" >> $GITHUB_ENV
           else
             echo "SKIP_BUILD=false" >> $GITHUB_ENV
+          fi
         shell: bash
 
       - name: ⏭️ Skip build si aucun changement
