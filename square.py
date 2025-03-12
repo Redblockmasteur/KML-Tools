@@ -10,7 +10,7 @@ from PIL import Image, ImageTk
 # Dictionnaire de langues
 LANGUAGES = {
     "fr": {
-        "title": "Générateur de KML",
+        "title": "KML-Tools",
         "latitude": "Latitude :",
         "longitude": "Longitude :",
         "size": "Longueur du côté (m) :",
@@ -24,7 +24,7 @@ LANGUAGES = {
         "OSM": "Données cartographiques © OpenStreetMap"
     },
     "en": {
-        "title": "KML Generator",
+        "title": "KML-Tools ",
         "latitude": "Latitude:",
         "longitude": "Longitude:",
         "size": "Side length (m):",
