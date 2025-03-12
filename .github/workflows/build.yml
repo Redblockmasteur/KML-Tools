@@ -13,17 +13,22 @@ jobs:
       - name: 🛎️ Checkout repository
         uses: actions/checkout@v4
 
-      - name: ⚡ Vérifier si un build est nécessaire
+      - name: ⚡ Verify if build is needed
         id: check_changes
         run: |
-          if git diff --quiet HEAD^ HEAD -- square.py; then
-            echo "SKIP_BUILD=true" >> $GITHUB_ENV
+          if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+            if git diff --quiet HEAD^ HEAD -- square.py; then
+              echo "SKIP_BUILD=true" >> $GITHUB_ENV
+            else
+              echo "SKIP_BUILD=false" >> $GITHUB_ENV
+            fi
           else
-            echo "SKIP_BUILD=false" >> $GITHUB_ENV
+            echo "SKIP_BUILD=false" >> $GITHUB_ENV  # Forcer le build si c'est le premier commit
           fi
         shell: bash
 
-      - name: ⏭️ Skip build si aucun changement
+
+      - name: ⏭️ Skip build if no code change
         if: env.SKIP_BUILD == 'true'
         run: echo "Aucun changement détecté, on saute la compilation."
 
