@@ -18,36 +18,49 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: 🏗 Install Tkinter on Ubuntu
-        if: runner.os == 'Linux'
+      - name: 🏗 Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-tk python3-pil.imagetk
-
-      - name: 🏗 Install Tkinter on MacOS
-        if: runner.os == 'macOS'
-        run: |
-          brew install python-tk
-
-      - name: 📦 Install dependencies
-        run: |
+          if [ $RUNNER_OS = "Linux" ]; then
+            sudo apt-get update
+            sudo apt-get install -y python3-tk python3-pil.imagetk
+          elif [ $RUNNER_OS = "macOS" ]; then
+            brew install python-tk
+          fi
           python -m pip install --upgrade pip
           pip install pyinstaller geopy tkintermapview pillow
-        shell: bash 
+        shell: bash
 
-      - name: 🔨 Build executable (Linux & Mac)
-        if: runner.os != 'Windows'
+      - name: 🔨 Build executable (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          pyinstaller --onefile --windowed --add-data "logo.png:img" --name "KML_Generator" square.py
+          pyinstaller --onefile --windowed \
+            --icon=logo.png \
+            --add-data "logo.png:." \
+            --name "KML_Generator" \
+            square.py
+        shell: bash
+
+      - name: 🔨 Build executable (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          pyinstaller --onefile --windowed \
+            --icon=logo.icns \
+            --add-data "logo.icns:." \
+            --name "KML_Generator" \
+            square.py
         shell: bash
 
       - name: 🔨 Build executable (Windows)
-        if: runner.os == 'Windows'
+        if: matrix.os == 'windows-latest'
         run: |
-          pyinstaller --onefile --windowed --add-data "logo.png;img" --name "KML_Generator" square.py
+          pyinstaller --onefile --windowed ^
+            --icon=logo.ico ^
+            --add-data "logo.ico;." ^
+            --name "KML_Generator" ^
+            square.py
         shell: cmd
 
-      - name: 📤 Upload artifact (Linux, Windows & MacOS)
+      - name: 📤 Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: KML_Generator_${{ matrix.os }}
