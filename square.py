@@ -33,7 +33,7 @@ LANGUAGES = {
         "extended_data_name": "Extended Data Name:",
         "extended_data_value": "Extended Data Value:",
         "generate": "Generate KML",
-        "saved": "File saved: ",
+        "saved": "File saved at: ",
         "center": "Square center",
         "OSM": "Map data © OpenStreetMap contributors"
     }
@@ -47,6 +47,54 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")  # Mode normal
 
     return os.path.join(base_path, relative_path)
+
+def generate_kml(lat, lon, size_meters, output_file, line_color, line_width, extended_data_name, extended_data_value):
+    """ Génère un fichier KML avec un carré centré sur (lat, lon) """
+    from geopy.distance import great_circle
+
+    half_size = size_meters / 2
+    
+    top = great_circle(meters=half_size).destination((lat, lon), 0)
+    bottom = great_circle(meters=half_size).destination((lat, lon), 180)
+    left = great_circle(meters=half_size).destination((lat, lon), 270)
+    right = great_circle(meters=half_size).destination((lat, lon), 90)
+
+    coords = [
+        (top.latitude, left.longitude),
+        (top.latitude, right.longitude),
+        (bottom.latitude, right.longitude),
+        (bottom.latitude, left.longitude),
+        (top.latitude, left.longitude)  # Fermeture du polygone
+    ]
+
+    kml = ET.Element("kml", xmlns="http://www.opengis.net/kml/2.2")
+    document = ET.SubElement(kml, "Document")
+    placemark = ET.SubElement(document, "Placemark")
+
+    style = ET.SubElement(placemark, "Style")
+    linestyle = ET.SubElement(style, "LineStyle")
+    ET.SubElement(linestyle, "color").text = line_color
+    ET.SubElement(linestyle, "width").text = str(line_width)
+
+    polystyle = ET.SubElement(style, "PolyStyle")
+    ET.SubElement(polystyle, "fill").text = "0"
+
+    extended_data = ET.SubElement(placemark, "ExtendedData")
+    data = ET.SubElement(extended_data, "Data", name=extended_data_name)
+    ET.SubElement(data, "value").text = extended_data_value
+
+    polygon = ET.SubElement(placemark, "Polygon")
+    outer_boundary = ET.SubElement(polygon, "outerBoundaryIs")
+    linear_ring = ET.SubElement(outer_boundary, "LinearRing")
+    coordinates = ET.SubElement(linear_ring, "coordinates")
+    coordinates.text = " ".join(f"{lon},{lat},0" for lat, lon in coords)
+
+    tree = ET.ElementTree(kml)
+    tree.write(output_file, encoding="utf-8", xml_declaration=True)
+
+    print(f"✅ Fichier KML généré : {output_file}")
+
+
 
 class App(tk.Tk):
     def __init__(self):
