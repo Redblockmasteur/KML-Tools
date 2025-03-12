@@ -53,7 +53,7 @@ class App(tk.Tk):
         super().__init__()
         self.selected_language = "fr"
         self.title(LANGUAGES[self.selected_language]["title"])
-        self.geometry("800x660")
+        self.geometry("800x650")
         
         try:
             if sys.platform.startswith("win"):
