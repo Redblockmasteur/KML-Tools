@@ -56,20 +56,31 @@ class App(tk.Tk):
         self.geometry("800x650")
         
         try:
-
             if sys.platform.startswith("win"):
                 icon_path = resource_path("logo.ico")
-                self.iconbitmap(icon_path)
+                if os.path.exists(icon_path):
+                    try:
+                        self.iconbitmap(icon_path)
+                    except Exception as e:
+                        print(f"Erreur lors de l'application de l'icône Windows : {e}")
+                else:
+                    print("Icône Windows introuvable, l'application fonctionne sans icône.")
 
-            else:
-                try:
-                    icon_image = ImageTk.PhotoImage(file="logo.png")
-                    self.iconphoto(False, icon_image)
-                    self._icon_image_ref = icon_image
-                except Exception as e:
-                    print(f"Erreur lors du chargement de l'icône PNG : {e}")
+            elif not getattr(sys, 'frozen', False):  # Vérifie si l'application est compilée
+                # Chargement uniquement en mode script (pas en .exe ou en binaire Linux)
+                icon_path = resource_path("logo.png")
+                if os.path.exists(icon_path):
+                    try:
+                        icon_image = ImageTk.PhotoImage(file=icon_path)
+                        self.iconphoto(False, icon_image)
+                        self._icon_image_ref = icon_image  # Prévenir le garbage collector
+                    except Exception as e:
+                        print(f"Erreur lors du chargement de l'icône PNG (fallback sans icône) : {e}")
+                else:
+                    print("Icône PNG non trouvée, l'application fonctionne sans icône.")
+
         except Exception as e:
-            print(f"Erreur lors de la configuration de l'icône : {e}")
+            print(f"Erreur lors de la configuration de l'icône (fallback sans icône) : {e}")
         
         lang_frame = tk.Frame(self)
         lang_frame.pack(pady=5)
