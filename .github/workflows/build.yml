@@ -25,12 +25,19 @@ jobs:
         run: |
           if [ $RUNNER_OS = "Linux" ]; then
             sudo apt-get update
-            sudo apt-get install -y python3-tk python3-pil.imagetk
+            sudo apt-get install -y \
+              python3-tk python3-pil.imagetk \
+              libjpeg-dev zlib1g-dev libfreetype6-dev \
+              liblcms2-dev libwebp-dev tcl-dev tk-dev \
+              libharfbuzz-dev libfribidi-dev libxcb1-dev
+            
+            # Forcer la recompilation propre de Pillow
             pip install --no-cache-dir --force-reinstall --no-binary :all: pillow
           fi
           python -m pip install --upgrade pip
           pip install pyinstaller geopy tkintermapview
         shell: bash
+
 
 
       - name: 🔨 Build executable (Linux)
