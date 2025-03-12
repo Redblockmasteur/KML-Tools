@@ -3,7 +3,7 @@ name: Build KML Generator
 on:
   push:
     paths:
-      - "square.py"  # Déclenche le workflow SEULEMENT si square.py est modifié
+      - "square.py"
 
 jobs:
   build:
@@ -30,6 +30,15 @@ jobs:
             brew install python-tk
           fi
           python -m pip install --upgrade pip
+          pip install pyinstaller geopy tkintermapview pillow
+        shell: bash
+
+      - name: 🔄 Forcer Python en x86_64 pour macOS Intel
+        if: matrix.os == 'macos-latest'
+        run: |
+          arch -x86_64 /usr/local/bin/python3 -m venv venv_x86
+          source venv_x86/bin/activate
+          pip install --upgrade pip
           pip install pyinstaller geopy tkintermapview pillow
         shell: bash
 
@@ -74,7 +83,8 @@ jobs:
       - name: 🔨 Build executable (macOS Intel x86_64)
         if: matrix.os == 'macos-latest'
         run: |
-          arch -x86_64 pyinstaller --onefile --windowed --target-arch=x86_64 \
+          source venv_x86/bin/activate
+          arch -x86_64 venv_x86/bin/python -m PyInstaller --onefile --windowed --target-arch=x86_64 \
             --icon=logo.icns \
             --add-data "logo.icns:." \
             --name "KML_Generator_x86_64" \
