@@ -34,10 +34,12 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           pyinstaller --onefile --windowed \
-            --icon=logo.png \
-            --add-data "logo.png:." \
-            --name "KML_Generator" \
-            square.py
+          --hidden-import PIL._tkinter_finder \
+          --hidden-import PIL.ImageTk \
+          --icon=logo.png \
+          --name "KML_Generator" \
+          square.py
+
         shell: bash
 
       - name: 🔨 Build executable (macOS)
