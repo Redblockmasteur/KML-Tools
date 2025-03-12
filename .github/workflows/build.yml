@@ -23,27 +23,29 @@ jobs:
 
       - name: 🏗 Install dependencies
         run: |
-          if [ $RUNNER_OS = "Linux" ]; then
+          python -m pip install --upgrade pip
+          pip install pyinstaller geopy tkintermapview pillow
+
+          if [ "$RUNNER_OS" = "Linux" ]; then
             sudo apt-get update
             sudo apt-get install -y \
               python3-tk python3-pil.imagetk \
               libjpeg-dev zlib1g-dev libfreetype6-dev \
               liblcms2-dev libwebp-dev tcl-dev tk-dev \
               libharfbuzz-dev libfribidi-dev libxcb1-dev
-            
-            # Forcer la recompilation propre de Pillow
+
+            # Recompiler Pillow proprement
             pip install --no-cache-dir --force-reinstall --no-binary :all: pillow
           fi
-          python -m pip install --upgrade pip
-          pip install pyinstaller geopy tkintermapview
         shell: bash
-
-
 
       - name: 🔨 Build executable (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
           pyinstaller --onefile --windowed \
+            --hidden-import=PIL.ImageTk \
+            --hidden-import=tkintermapview \
+            --collect-submodules PIL \
             --icon=logo.png \
             --add-data "logo.png:." \
             --name "KML_Generator" \
@@ -54,6 +56,9 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           pyinstaller --onefile --windowed \
+            --hidden-import=PIL.ImageTk \
+            --hidden-import=tkintermapview \
+            --collect-submodules PIL \
             --icon=logo.icns \
             --add-data "logo.icns:." \
             --name "KML_Generator" \
@@ -64,6 +69,9 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
           pyinstaller --onefile --windowed ^
+            --hidden-import=PIL.ImageTk ^
+            --hidden-import=tkintermapview ^
+            --collect-submodules PIL ^
             --icon=logo.ico ^
             --add-data "logo.ico;." ^
             --name "KML_Generator" ^
