@@ -1,6 +1,10 @@
 name: Build KML Generator
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - "square.py"  # Déclenche le workflow SEULEMENT si square.py est modifié
+
 
 jobs:
   build:
@@ -14,11 +18,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 🐍 Set up Python
+        if: env.SKIP_BUILD == 'false'
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: 🏗 Install dependencies
+        if: env.SKIP_BUILD == 'false'
         run: |
           if [ $RUNNER_OS = "Linux" ]; then
             sudo apt-get update
@@ -31,19 +37,17 @@ jobs:
         shell: bash
 
       - name: 🔨 Build executable (Linux)
-        if: matrix.os == 'ubuntu-latest'
+        if: env.SKIP_BUILD == 'false' && matrix.os == 'ubuntu-latest'
         run: |
           pyinstaller --onefile --windowed \
-          --hidden-import PIL._tkinter_finder \
-          --hidden-import PIL.ImageTk \
-          --icon=logo.png \
-          --name "KML_Generator" \
-          square.py
-
+            --icon=logo.png \
+            --add-data "logo.png:." \
+            --name "KML_Generator" \
+            square.py
         shell: bash
 
       - name: 🔨 Build executable (macOS)
-        if: matrix.os == 'macos-latest'
+        if: env.SKIP_BUILD == 'false' && matrix.os == 'macos-latest'
         run: |
           pyinstaller --onefile --windowed \
             --icon=logo.icns \
@@ -53,7 +57,7 @@ jobs:
         shell: bash
 
       - name: 🔨 Build executable (Windows)
-        if: matrix.os == 'windows-latest'
+        if: env.SKIP_BUILD == 'false' && matrix.os == 'windows-latest'
         run: |
           pyinstaller --onefile --windowed ^
             --icon=logo.ico ^
@@ -63,6 +67,7 @@ jobs:
         shell: cmd
 
       - name: 📤 Upload artifact
+        if: env.SKIP_BUILD == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: KML_Generator_${{ matrix.os }}
