@@ -54,10 +54,20 @@ class App(tk.Tk):
         self.geometry("800x650")
         
         try:
-            self.icon_image = ImageTk.PhotoImage(file=resource_path("logo.png"))
-            self.tk.call("wm", "iconphoto", self._w, self.icon_image)
+
+            if sys.platform.startswith("win"):
+                icon_path = resource_path("logo.ico")
+                self.iconbitmap(icon_path)
+
+            else:
+                try:
+                    icon_image = ImageTk.PhotoImage(file="logo.png")
+                    self.iconphoto(False, icon_image)
+                    self._icon_image_ref = icon_image
+                except Exception as e:
+                    print(f"Erreur lors du chargement de l'icône PNG : {e}")
         except Exception as e:
-            print(f"⚠️ Impossible de charger l'icône : {e}")
+            print(f"Erreur lors de la configuration de l'icône : {e}")
         
         lang_frame = tk.Frame(self)
         lang_frame.pack(pady=5)
