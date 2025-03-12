@@ -1,6 +1,10 @@
 name: Build KML Generator
 
-on: [push]
+on:
+  push:
+    paths:
+      - "square.py"  # Déclenche le workflow SEULEMENT si square.py est modifié
+
 
 jobs:
   build:
@@ -12,25 +16,6 @@ jobs:
     steps:
       - name: 🛎️ Checkout repository
         uses: actions/checkout@v4
-
-      - name: ⚡ Verify if build is needed
-        id: check_changes
-        run: |
-          if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
-            if git diff --quiet HEAD^ HEAD -- square.py; then
-              echo "SKIP_BUILD=true" >> $GITHUB_ENV
-            else
-              echo "SKIP_BUILD=false" >> $GITHUB_ENV
-            fi
-          else
-            echo "SKIP_BUILD=false" >> $GITHUB_ENV  # Forcer le build si c'est le premier commit
-          fi
-        shell: bash
-
-
-      - name: ⏭️ Skip build if no code change
-        if: env.SKIP_BUILD == 'true'
-        run: echo "Aucun changement détecté, on saute la compilation."
 
       - name: 🐍 Set up Python
         if: env.SKIP_BUILD == 'false'
