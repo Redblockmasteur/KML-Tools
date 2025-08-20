@@ -1,4 +1,5 @@
 import os
+import locale
 import sys
 import xml.etree.ElementTree as ET
 import tkinter as tk
@@ -10,6 +11,7 @@ from PIL import Image, ImageTk
 # Dictionnaire de langues
 LANGUAGES = {
     "fr": {
+        "language":"Langue",
         "title": "Générateur de KML",
         "latitude": "Latitude :",
         "longitude": "Longitude :",
@@ -23,6 +25,7 @@ LANGUAGES = {
         "center": "Centre du Carré"
     },
     "en": {
+        "language":"Language",
         "title": "KML Generator",
         "latitude": "Latitude:",
         "longitude": "Longitude:",
@@ -49,6 +52,7 @@ def resource_path(relative_path):
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.labels = {}
         self.selected_language = "fr"
         self.title(LANGUAGES[self.selected_language]["title"])
         self.geometry("800x650")
@@ -69,12 +73,25 @@ class App(tk.Tk):
                     print(f"Erreur lors du chargement de l'icône PNG : {e}")
         except Exception as e:
             print(f"Erreur lors de la configuration de l'icône : {e}")
-        
+
+        defautl_lang = locale.getlocale()[0]
+
+        if defautl_lang:
+            if defautl_lang.startswith('fr'):
+                defautl_lang = "fr"
+            else:
+                defautl_lang = "en"
+        else:
+            defautl_lang = "en"
+
+                
         lang_frame = tk.Frame(self)
         lang_frame.pack(pady=5)
-        tk.Label(lang_frame, text="Langue / Language:").pack(side=tk.LEFT)
+        self.language_label = tk.Label(lang_frame, text=LANGUAGES[self.selected_language]["language"])
+        self.language_label.pack(side=tk.LEFT)
+        self.labels["language"] = self.language_label  # Ajoute le Label au dictionnaire
         self.lang_selector = ttk.Combobox(lang_frame, values=["fr", "en"], state="readonly")
-        self.lang_selector.set("fr")
+        self.lang_selector.set(defautl_lang)
         self.lang_selector.pack(side=tk.LEFT, padx=5)
         self.lang_selector.bind("<<ComboboxSelected>>", self.change_language)
         
