@@ -2,7 +2,7 @@ import os
 import sys
 import xml.etree.ElementTree as ET
 import tkinter as tk
-from tkinter import filedialog, ttk
+from tkinter import filedialog, messagebox, ttk
 from geopy.distance import great_circle
 import tkintermapview
 from PIL import Image, ImageTk
@@ -47,6 +47,15 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")  # Mode normal
 
     return os.path.join(base_path, relative_path)
+
+
+def validate_float(value):
+    """Convertit une entrée en float et lève une ValueError en cas d'échec."""
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        raise ValueError(f"Valeur numérique invalide: {value}")
+
 
 def generate_kml(lat, lon, size_meters, output_file, line_color, line_width, extended_data_name, extended_data_value):
     """ Génère un fichier KML avec un carré centré sur (lat, lon) """
@@ -217,14 +226,23 @@ class App(tk.Tk):
         output_file = filedialog.asksaveasfilename(defaultextension=".kml", filetypes=[("KML files", "*.kml")])
         if not output_file:
             return
-        
+
+        try:
+            lat = validate_float(self.lat_var.get())
+            lon = validate_float(self.lon_var.get())
+            size = validate_float(self.size_var.get())
+            width = int(validate_float(self.width_var.get()))
+        except ValueError as e:
+            messagebox.showerror("Erreur", str(e))
+            return
+
         generate_kml(
-            float(self.lat_var.get()),
-            float(self.lon_var.get()),
-            float(self.size_var.get()),
+            lat,
+            lon,
+            size,
             output_file,
             self.color_var.get(),
-            int(self.width_var.get()),
+            width,
             self.data_name_var.get(),
             self.data_value_var.get()
         )
