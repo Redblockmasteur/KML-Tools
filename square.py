@@ -11,6 +11,7 @@ from PIL import Image, ImageTk
 LANGUAGES = {
     "fr": {
         "title": "KML-Tools",
+        "language": "Langue :",
         "latitude": "Latitude :",
         "longitude": "Longitude :",
         "size": "Longueur du côté (m) :",
@@ -25,6 +26,7 @@ LANGUAGES = {
     },
     "en": {
         "title": "KML-Tools ",
+        "language": "Language:",
         "latitude": "Latitude:",
         "longitude": "Longitude:",
         "size": "Side length (m):",
@@ -132,7 +134,8 @@ class App(tk.Tk):
         
         lang_frame = tk.Frame(self)
         lang_frame.pack(pady=5)
-        tk.Label(lang_frame, text="Langue / Language:").pack(side=tk.LEFT)
+        self.language_label = tk.Label(lang_frame, text=LANGUAGES[self.selected_language]["language"])
+        self.language_label.pack(side=tk.LEFT)
         self.lang_selector = ttk.Combobox(lang_frame, values=["fr", "en"], state="readonly")
         self.lang_selector.set("fr")
         self.lang_selector.pack(side=tk.LEFT, padx=5)
@@ -199,6 +202,7 @@ class App(tk.Tk):
     def change_language(self, event):
         self.selected_language = self.lang_selector.get()
         self.title(LANGUAGES[self.selected_language]["title"])
+        self.language_label.config(text=LANGUAGES[self.selected_language]["language"])
         for key in self.labels:
             self.labels[key].config(text=LANGUAGES[self.selected_language][key])
         self.generate_button.config(text=LANGUAGES[self.selected_language]["generate"])
